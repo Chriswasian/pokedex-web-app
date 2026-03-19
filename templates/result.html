@@ -3,51 +3,59 @@
 
 <head>
     <title>Wilson's Pokedex Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
-    <h1>{{ pokemon.name }}</h1>
+    <div class="container">
+        <div class="pokemon-card">
+            <h1>{{ pokemon.name }}</h1>
 
-    <p><img id="pokemon-sprite" src="{{ pokemon.sprites.front_default }}" alt="{{ pokemon.name }}">
-        <button onclick="toggleShiny()">✨ Shiny</button>
+            <p><img id="pokemon-sprite" src="{{ pokemon.sprites.front_default }}" alt="{{ pokemon.name }}">
+                <br>
+                <button onclick="toggleShiny()">✨ Shiny</button>
+                <br><br>
+                {% for type_info in pokemon.types %}
+                <span class="type-badge">{{ type_info.type.name }}</span>
+                {% endfor %}
+            </p>
+            <h3>Base stats</h3>
+            {% for stat in pokemon.stats %}
+            <p>{{ stat.stat.name }}: {{ stat.base_stat }}</p>
+            {% endfor %}
+            <h3>Pokedex Info</h3>
+            <p>{{ flavor_text }}</p>
+            <h3>Evolution Chain</h3>
+            <pre>{{ evolution_chain | safe }}</pre>
+            <h3>Catch Locations</h3>
+            {% if encounters %}
+            {% for location in encounters %}
+            <p>
+                {{ location.location_area.name.replace('-', ' ').title() }}
+                <small>({{ location.version_details | map(attribute='version') | map(attribute='name') | map('replace',
+                    '-', '
+                    ') | map('title') | join(', ') }})</small>
+            </p>
+            {% endfor %}
+            {% for loc in locations %}
+            <p>{{ loc.area }} <small>({{ loc.games }})</small></p>
+            {% endfor %}
+            {% else %}
+            <p>Not found in the wild</p>
+            {% endif %}
+        </div>
+    </div>
+    <script>
+        const normal = "{{ pokemon.sprites.front_default }}";
+        const shiny = "{{ pokemon.sprites.front_shiny }}";
+        let isShiny = false;
 
-        <script>
-            const normal = "{{ pokemon.sprites.front_default }}";
-            const shiny = "{{ pokemon.sprites.front_shiny }}";
-            let isShiny = false;
-
-            function toggleShiny() {
-                isShiny = !isShiny;
-                document.getElementById('pokemon-sprite').src = isShiny ? shiny : normal;
-            }
-        </script>
-        {% for type_info in pokemon.types %}
-        <span>{{ type_info.type.name }}</span>
-        {% endfor %}
-    </p>
-    <h3>Base stats</h3>
-    {% for stat in pokemon.stats %}
-    <p>{{ stat.stat.name }}: {{ stat.base_stat }}</p>
-    {% endfor %}
-    <h3>Pokedex Info</h3>
-    <p>{{ flavor_text }}</p>
-    <h3>Evolution Chain</h3>
-    <pre>{{ evolution_chain | safe }}</pre>
-    <h3>Catch Locations</h3>
-    {% if encounters %}
-    {% for location in encounters %}
-    <p>
-        {{ location.location_area.name.replace('-', ' ').title() }}
-        <small>({{ location.version_details | map(attribute='version') | map(attribute='name') | map('replace', '-', '
-            ') | map('title') | join(', ') }})</small>
-    </p>
-    {% endfor %}
-    {% for loc in locations %}
-    <p>{{ loc.area }} <small>({{ loc.games }})</small></p>
-    {% endfor %}
-    {% else %}
-    <p>Not found in the wild</p>
-    {% endif %}
+        function toggleShiny() {
+            isShiny = !isShiny;
+            document.getElementById('pokemon-sprite').src = isShiny ? shiny : normal;
+        }
+    </script>
 </body>
+
 
 </html>
