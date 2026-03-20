@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 import requests
 
 app = Flask(__name__)
@@ -42,6 +42,8 @@ def index():
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
+    if request.method == 'GET':
+        return redirect('/')
     pokemon_name = request.form.get('pokemon_name')
     url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}"
     response = requests.get(url)
@@ -60,8 +62,10 @@ def search():
         locations = []
         for loc in encounters_data:
             area = loc['location_area']['name'].replace('-', ' ').title()
-        games = [v['version']['name'].replace('-', ' ').title() for v in loc['version_details']]
-        locations.append({'area': area, 'games': ', '.join(games)})
+            games = []
+            for v in loc['version_details']:
+                games.append(v['version']['name'].replace('-', ' ').title())
+            locations.append({'area': area, 'games': ', '.join(games)})
         flavor_text = ""
         for entry in species_data['flavor_text_entries']:
                 if entry['language']['name'] == 'en':
